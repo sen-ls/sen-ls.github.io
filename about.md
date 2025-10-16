@@ -34,3 +34,21 @@ Auf dieser Webseite teile ich meine **Projekte, technische Notizen und Lernerfah
 Wenn Sie sich für meine Inhalte interessieren oder Fragen haben, können Sie mich gerne kontaktieren:  
 📧 **sen.liao@outlook.com**
 
+## 🌐 Connect with me
+
+<div align="center" style="margin-top: 1.5em;">
+  <div class="badge-base LI-profile-badge"
+       data-locale="en_US"
+       data-size="medium"
+       data-theme="light"
+       data-type="HORIZONTAL"
+       data-vanity="sen-liao2025"
+       data-version="v1">
+    <a class="badge-base__link LI-simple-link"
+       href="https://www.linkedin.com/in/sen-liao2025?trk=profile-badge">
+       Sen Liao
+    </a>
+  </div>
+  <script src="https://platform.linkedin.com/badges/js/profile.js"
+          async defer type="text/javascript"></script>
+</div>
