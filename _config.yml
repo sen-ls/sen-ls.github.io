@@ -1,0 +1,15 @@
+title: Sen's Tech Blog
+description: "Notes, experiments, and how‑tos."
+author:
+  name: Sen Liao
+  email: sen.liao@outlook.com
+url: ""        # e.g. https://sen-ls.github.io  (fill in after you publish)
+baseurl: ""    # leave empty for user/organization pages; set to /repo-name for project pages
+theme: minima
+plugins:
+  - jekyll-feed
+minima:
+  social_links:
+    github: sen-ls
+show_excerpts: true
+timezone: Europe/Berlin
