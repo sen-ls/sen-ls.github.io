@@ -4,9 +4,8 @@ author:
   name: Sen Liao
   email: sen.liao@outlook.com
 
-# 对于用户主页 (username.github.io)：
-url: ""        # 例如 https://sen-ls.github.io
-baseurl: ""    # 若是项目页则改成 /repo-name
+url: ""        # e.g. https://sen-ls.github.io
+baseurl: ""    # for project site: /repo-name
 
 theme: minima
 
@@ -14,23 +13,16 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
 
-# 页眉显示固定的页面
 header_pages:
   - about.md
 
-# 社交图标设置（minima 主题会自动显示图标+超链接）
 minima:
   social_links:
     - platform: github
       user_url: https://github.com/sen-ls
     - platform: linkedin
       user_url: https://www.linkedin.com/in/sen-liao-737971164/
-  footer:
-    content: "© {{ site.time | date: '%Y' }} Sen Liao — All rights reserved."
 
-# 其他配置
 show_excerpts: true
 timezone: Europe/Berlin
 markdown: kramdown
-paginate: 10
-paginate_path: "/page:num/"
