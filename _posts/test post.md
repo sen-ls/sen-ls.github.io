@@ -1,10 +1,9 @@
 ---
 layout: post
-title: "ttt"
+title: "Test Post"
 date: 2025-10-20 16:00:00 +0200
-categories: [getting-started]
-tags: [github-pages, jekyll, minima]
+categories: [testing]
+tags: [example, test]
 ---
 
-Test again
-```
+This is a test post to verify the blog functionality. It follows the correct format for Jekyll posts, ensuring proper rendering on the homepage.
