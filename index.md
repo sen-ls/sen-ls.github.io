@@ -16,3 +16,12 @@ title: Home
 <div style="text-align: center;">
   <p>Explore the latest posts below and join me on this journey of continuous learning and innovation.</p>
 </div>
+
+<ul>
+  {% for post in site.posts %}
+    <li>
+      <a href="{{ post.url }}">{{ post.title }}</a>
+      <p>{{ post.excerpt }}</p>
+    </li>
+  {% endfor %}
+</ul>
