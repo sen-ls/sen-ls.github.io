@@ -5,7 +5,6 @@ categories: [networking, datacenter]
 tags: [bgp, vxlan, configuration]
 ---
 
-<h2>Datacenter Classical BGP and VXLAN Configuration</h2>
 <p>
   This blog post explains the configuration of BGP and VXLAN in a datacenter environment.  
   The goal is to achieve a scalable and efficient network design through classical underlay and overlay separation.
@@ -58,7 +57,7 @@ tags: [bgp, vxlan, configuration]
        style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 </p>
 
-<h3>VRF / EVPN Instance: <code>vpn1</code></h3>
+<h4>VRF / EVPN Instance: <code>vpn1</code></h4>
 
 <p>
   The following configuration creates a tenant VRF (<code>vpn1</code>) and assigns
@@ -86,7 +85,7 @@ tags: [bgp, vxlan, configuration]
        style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 </p>
 
-<h4>Why these lines matter</h4>
+<h5>Why these lines matter</h5>
 <ul>
   <li><strong><code>ip vpn-instance vpn1</code></strong> — Creates a VRF named <em>vpn1</em>.
       This is the tenant routing table used by your overlay (and any L3 gateways you later bind to it).</li>
