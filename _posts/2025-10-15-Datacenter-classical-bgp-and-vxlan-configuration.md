@@ -24,7 +24,7 @@ tags: [bgp, vxlan, configuration]
   </p>
 
   <p align="center">
-    <img src="{{ '/assets/imges/2025-10-15/TOPO-realistic.png' | relative_url }}"
+    <img src="{{ '/assets/images/2025-10-15/TOPO-realistic.png' | relative_url }}"
          alt="Experimental Topology"
          style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
   </p>
@@ -54,3 +54,4 @@ tags: [bgp, vxlan, configuration]
   <p>
     Das folgende Topologiebild (<code>TOPO-realistic.png</code>) zeigt den Versuchsaufbau.  
     Es umfasst den IRF-Leaf-Stack, Spine, Leaf2 sowie die verbundenen Server und Clients zur Überprüfung des DHCP-Relay- und VXLAN
+</div>
