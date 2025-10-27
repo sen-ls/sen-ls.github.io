@@ -22,6 +22,11 @@ tags: [bgp, vxlan, configuration]
        style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 </p>
 
+<p>
+  The devices (switches) used in this setup must support both DHCP relay and L2VPN functionalities as mandatory features.  
+  In this blog, the HCL simulation tool from H3C is used to realize the configuration and testing.
+</p>
+
 <h3>Steps:</h3>
 <ol>
   <li>Establish the IRF connection between leaf switches and connect to the server.  
@@ -114,4 +119,82 @@ tags: [bgp, vxlan, configuration]
 Later, when you enable L3 gateway for the tenant, you will bind the relevant SVI/VBDIF or interface to
 <code>vpn1</code> so routed traffic uses this VRF. Ensuring matching RTs (<code>2:2</code>) across both leaves
 guarantees that EVPN/VPNv4 routes for this tenant are imported on all participating PEs.</p>
+
+<h3>SVI/VBDIF (IRB) Interfaces on the IRF leaf</h3>
+
+<p align="center">
+  <img src="{{ '/assets/images/2025-10-15/irf vsi int.png' | relative_url }}"
+       alt="IRF leaf Vsi-interface configuration"
+       style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</p>
+
+<pre><code>interface Vsi-interface102
+ ip binding vpn-instance vpn1
+ ip address 10.1.0.254 255.255.255.0
+ mac-address 0001-0001-0001
+ local-proxy-arp enable
+ distributed-gateway local
+
+interface Vsi-interface103
+ ip binding vpn-instance vpn1
+ ip address 10.1.1.254 255.255.255.0
+ mac-address 0001-0002-0001
+ local-proxy-arp enable
+ dhcp select relay
+ dhcp relay information enable
+ dhcp relay server-address &lt;DHCP-SERVER-IP&gt; vpn-instance vpn1
+ dhcp relay source-address interface LoopBack1
+ distributed-gateway local
+</code></pre>
+
+<h4>Line-by-line explanation</h4>
+<ul>
+  <li><b>ip binding vpn-instance vpn1</b> — Places the SVI (IRB) into tenant VRF <code>vpn1</code>, so routing for this subnet uses the tenant table and the EVPN/VPNv4 policies you set earlier.</li>
+  <li><b>ip address 10.1.0.254/24</b> on <code>Vsi-interface102</code> — L3 gateway for the subnet where the <em>DHCP server</em> resides (acts as the server VLAN’s default gateway).</li>
+  <li><b>ip address 10.1.1.254/24</b> on <code>Vsi-interface103</code> — L3 gateway for the <em>client pool</em> subnet (matches the gateway configured in the DHCP server’s IP pool).</li>
+  <li><b>mac-address 0001-xxxx-0001</b> — Sets a stable virtual MAC for the anycast gateway. For distributed gateway, keep the <em>same MAC per VLAN</em> across all participating leaves to ensure hosts ARP to the same gateway MAC.</li>
+  <li><b>local-proxy-arp enable</b> — The leaf answers ARP locally to reduce L2 flooding across the EVPN fabric (useful in VXLAN overlays).</li>
+  <li><b>dhcp select relay</b> (on 103) — Enables the SVI to work as a DHCP relay agent for the client subnet.</li>
+  <li><b>dhcp relay information enable</b> — Inserts Option 82 (relay agent information) so the DHCP server can make per-interface/policy decisions.</li>
+  <li><b>dhcp relay server-address &lt;DHCP-SERVER-IP&gt; vpn-instance vpn1</b> — Points the relay to the DHCP server’s IP and VRF (server reachable via <code>vpn1</code>).</li>
+  <li><b>dhcp relay source-address interface LoopBack1</b> — Uses the loopback as source of the unicast DHCP relay packets; stable and routable across the underlay.</li>
+  <li><b>distributed-gateway local</b> — Enables EVPN anycast gateway on this SVI so both leaves can serve as the default gateway using the same virtual MAC/IP.</li>
+</ul>
+
+<h3>VSI (EVPN/VXLAN) Settings</h3>
+
+<p align="center">
+  <img src="{{ '/assets/images/2025-10-15/irf vsi setting.png' | relative_url }}"
+       alt="VSI EVPN/VXLAN settings"
+       style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</p>
+
+<pre><code>vsi 102
+ gateway vsi-interface 102
+ vxlan 102
+ evpn encapsulation vxlan
+  route-distinguisher auto
+  vpn-target auto export-extcommunity
+  vpn-target auto import-extcommunity
+
+vsi 103
+ gateway vsi-interface 103
+ vxlan 103
+ evpn encapsulation vxlan
+  route-distinguisher auto
+  vpn-target auto export-extcommunity
+  vpn-target auto import-extcommunity
+</code></pre>
+
+<ul>
+  <li><b>vsi &lt;id&gt;</b> — Creates a Layer-2 EVPN instance for the VLAN/VNI (tenant segment).</li>
+  <li><b>gateway vsi-interface &lt;id&gt;</b> — Binds the L3 SVI (IRB) to this VSI to form IRB (L2+L3) so the anycast gateway participates in EVPN (MAC/IP advertisement).</li>
+  <li><b>vxlan &lt;VNI&gt;</b> — Maps the VSI to a VXLAN Network Identifier (e.g., 102 ↔ VNI 102). All leaves with the same VNI build the same broadcast domain.</li>
+  <li><b>evpn encapsulation vxlan</b> — Uses EVPN as control-plane and VXLAN as data-plane for this VSI.</li>
+  <li><b>route-distinguisher auto</b> — Auto-generates the EVI RD. Unique per VSI per device; not used for policy, only uniqueness.</li>
+  <li><b>vpn-target auto import/export</b> — Auto-derives RTs for this EVI. As long as other leaves derive the same values (same VNI/EVI scheme), L2 EVPN routes are shared. (Your VRF <code>vpn1</code> RTs govern L3 routes; these <em>auto</em> RTs govern L2 EVPN.)</li>
+</ul>
+
+<p><em>Summary:</em> <code>Vsi-interface102</code> acts as the gateway in the server VLAN; <code>Vsi-interface103</code> is the client VLAN gateway and DHCP relay (server IP reachable via <code>vpn1</code>, relay sourced from <code>LoopBack1</code>). The <code>vsi 102/103</code> blocks bind IRB to VXLAN VNIs and enable EVPN control so MAC/IP reachability and anycast gateway are consistently advertised to peer leaves.</p>
+
 
