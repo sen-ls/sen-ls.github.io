@@ -24,7 +24,7 @@ tags: [bgp, vxlan, configuration]
 
 <p>
   The devices (switches) used in this setup must support both DHCP relay and L2VPN functionalities as mandatory features.  
-  In this blog, the HCL simulation tool from H3C is used to realize the configuration and testing.
+  In this blog, the <strong>HCL simulation tool from H3C</strong> is used to realize the configuration and testing.
 </p>
 
 <h3>Steps:</h3>
@@ -196,5 +196,73 @@ vsi 103
 </ul>
 
 <p><em>Summary:</em> <code>Vsi-interface102</code> acts as the gateway in the server VLAN; <code>Vsi-interface103</code> is the client VLAN gateway and DHCP relay (server IP reachable via <code>vpn1</code>, relay sourced from <code>LoopBack1</code>). The <code>vsi 102/103</code> blocks bind IRB to VXLAN VNIs and enable EVPN control so MAC/IP reachability and anycast gateway are consistently advertised to peer leaves.</p>
+
+<h3>IRF leaf — BGP configuration</h3>
+
+<p align="center">
+  <img src="{{ '/assets/images/2025-10-15/irf bgp con.png' | relative_url }}"
+       alt="IRF leaf BGP configuration"
+       style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</p>
+
+<pre><code>bgp 64000
+ router-id 172.17.3.141
+ peer 172.17.2.194 as-number 65000
+ peer 172.17.2.194 ebgp-max-hop 255
+ peer 172.17.3.42 as-number 64000
+ peer 172.17.3.42 connect-interface LoopBack0
+ #
+ address-family ipv4 unicast
+  network 172.17.3.141 255.255.255.255
+  peer 172.17.2.194 enable
+  peer 172.17.2.194 allow-as-loop 1
+ #
+ address-family l2vpn evpn
+  peer 172.17.3.42 enable
+</code></pre>
+
+<h4>Line-by-line explanation</h4>
+<ul>
+  <li><b>bgp 64000</b> — Local AS is <code>64000</code> on the IRF leaf.</li>
+
+  <li><b>router-id 172.17.3.141</b> — Sets a stable BGP Router-ID (usually a loopback /32). Also advertised by the
+      <code>network 172.17.3.141/32</code> statement below so it’s reachable in the underlay.</li>
+
+  <li><b>peer 172.17.2.194 as-number 65000</b> — Defines an eBGP neighbor (e.g., the spine or a remote leaf/ToR) with
+      remote AS <code>65000</code>.</li>
+
+  <li><b>peer 172.17.2.194 ebgp-max-hop 255</b> — Allows multi-hop eBGP (not just directly connected). Useful when
+      peering via loopbacks or when there are intermediate L3 hops in the underlay.</li>
+
+  <li><b>peer 172.17.3.42 as-number 64000</b> — iBGP neighbor (same AS 64000). Typically this is the EVPN iBGP peer
+      (another loopback on the remote leaf).</li>
+
+  <li><b>peer 172.17.3.42 connect-interface LoopBack0</b> — Source EVPN/iBGP sessions from <code>LoopBack0</code> to
+      build stable control-plane sessions decoupled from physical links.</li>
+
+  <li><b>address-family ipv4 unicast</b> — Underlay reachability (VPN-less IPv4). Carries loopbacks and
+      transit subnets used to form BGP sessions and next-hops.</li>
+
+  <li><b>network 172.17.3.141 255.255.255.255</b> — Advertises the loopback /32 (router-id) into the underlay so it can
+      be used for multi-hop peering and as a stable next-hop.</li>
+
+  <li><b>peer 172.17.2.194 enable</b> — Activates the eBGP neighbor for IPv4 unicast AFI/SAFI.</li>
+
+  <li style="border:1px solid #f66; padding:.4em; border-radius:.4em;"><b>peer 172.17.2.194 allow-as-loop 1</b> — 
+      <em>Key knob for single-AS designs.</em> It lets this BGP speaker accept routes that contain its own AS in the 
+      <code>AS_PATH</code> (up to 1 occurrence). In practice this enables you to keep a “one-AS” fabric and still bring up
+      underlay reachability with the opposite leaf via eBGP-like behavior—without having to introduce an extra
+      remote-AS just for the underlay. If both sides share the same AS, normal eBGP would drop updates when it sees its
+      own AS in the path; <code>allow-as-loop 1</code> relaxes that and allows the session/routes to work.</li>
+
+  <li><b>address-family l2vpn evpn</b> — EVPN control-plane for the VXLAN overlay.</li>
+
+  <li><b>peer 172.17.3.42 enable</b> — Enables the iBGP EVPN session (typically loopback-to-loopback) which carries
+      MAC/IP (Type-2), IRB routes (Type-5) etc. between leaves.</li>
+</ul>
+
+<p><em>Result:</em> With this setup the underlay can be established to the spine/peer, and the EVPN overlay runs over
+stable loopbacks. The <code>allow-as-loop 1</code> line is the trick that lets you maintain a single AS across the fabric
+while still exchanging underlay routes with the opposite leaf.</p>
 
 
