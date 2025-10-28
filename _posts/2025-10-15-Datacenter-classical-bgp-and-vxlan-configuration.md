@@ -315,7 +315,72 @@ while still exchanging underlay routes with the opposite leaf.</p>
 
   <li><b>address-family l2vpn evpn</b> — Enables the EVPN control-plane, which carries MAC/IP and tenant information for VXLAN overlays.</li>
 
-  <li><b>peer 172.17.3.42 enable</b> — Activates the EVPN iBGP session with the remote leaf. The Spine acts as a <b>Route Reflector</b>, redistributing EVPN routes (Type-2 for MAC/IP, Type-5 for IRB) across the fabric.</li>
-</ul>
+  <li><b>peer 172.17.3.42 enable</b> — Activates the EVPN iBGP session with the remote leaf. The Spine acts as a   <li style="border:1px solid #f66; padding:.4em; border-radius:.4em;"> <b>Route Reflector</b>, redistributing EVPN routes (Type-2 for MAC/IP, Type-5 for IRB) across the fabric.</li>
+</li> </ul>
 
 <p><em>Result:</em> This configuration allows the Spine (AS 65000) to form eBGP underlay sessions with Leafs (AS 64000) while maintaining a unified single-AS architecture through <code>allow-as-loop 1</code>. It also establishes iBGP EVPN sessions over loopbacks for overlay control-plane distribution, enabling VXLAN EVPN operation with stable multi-hop BGP connectivity.</p>
+
+<h4><strong>Third Step</strong>: Leaf2 Configuration</h4>
+
+<p align="center">
+  <img src="{{ '/assets/images/2025-10-15/leaf2 bgp con.png' | relative_url }}"
+       alt="Leaf2 BGP configuration"
+       style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</p>
+
+<pre><code>bgp 64000
+ router-id 172.17.3.200
+ peer 20.1.1.1 as-number 65000
+ peer 20.1.1.1 ebgp-max-hop 255
+ peer 172.17.3.42 as-number 64000
+ peer 172.17.3.42 connect-interface LoopBack0
+ #
+ address-family ipv4 unicast
+  network 172.17.3.200 255.255.255.255
+  peer 20.1.1.1 enable
+  peer 20.1.1.1 allow-as-loop 1
+ #
+ address-family l2vpn evpn
+  peer 172.17.3.42 enable
+ #
+ ip vpn-instance vpn1
+  #
+  address-family ipv4 unicast
+   network 172.17.254.43 255.255.255.255
+#
+return
+</code></pre>
+
+<p>The overall configuration of <b>Leaf2</b> is very similar to <b>Leaf1</b>, sharing the same AS number (<code>64000</code>) and the same BGP peering structure. The key difference lies in the part where the configuration binds an <code>ip vpn-instance</code> to BGP.</p>
+
+<h4>Explanation of <code>ip vpn-instance vpn1</code></h4>
+
+<ul>
+  <li><b>ip vpn-instance vpn1</b> — Creates a VPN instance (VRF) named <code>vpn1</code>. This defines a separate routing table for tenant traffic and is essential in EVPN-VXLAN deployments for multi-tenancy isolation.</li>
+
+  <li><b>address-family ipv4 unicast</b> — Enters the IPv4 unicast address family within this VRF. It allows BGP to advertise and learn routes belonging to this specific VPN instance instead of the global routing table.</li>
+
+  <li><b>network 172.17.254.43 255.255.255.255</b> — Advertises a route belonging to the tenant’s Layer-3 gateway or SVI (typically a <code>Vlan-interface</code> or <code>VBDIF</code> interface) inside <code>vpn1</code>.  
+  This ensures that tenant traffic can be properly routed between Leaf switches via the EVPN control plane, with each Leaf advertising its own VRF routes to the others.</li>
+</ul>
+
+<p><em>In summary:</em> this section enables tenant-specific routing by binding user subnets to the VPN instance <code>vpn1</code>. These routes are then distributed through EVPN Type-5 (IP Prefix) routes across the overlay network, achieving full Layer-3 connectivity between tenants over VXLAN.</p>
+
+---
+
+<h4><strong>Last Step</strong>: Validation</h4>
+
+<p>The detailed interface-level configuration is not shown here, as it mainly follows standard VLAN, VBDIF, and NVE binding steps already covered in previous sections.</p>
+
+<p>To verify the complete setup, ensure the following:</p>
+
+<ol>
+  <li><b>DHCP validation:</b> Both Leaf1 and Leaf2 clients should successfully obtain IP addresses from their respective VLANs, proving that the DHCP relay and underlay routes are functioning correctly.</li>
+
+  <li><b>VXLAN tunnel establishment:</b> Verify that the VXLAN tunnels are successfully established between the two Leafs (you can check this via <code>display vxlan tunnel brief</code>), confirming that the overlay control plane (EVPN) is active.</li>
+
+  <li><b>BGP reachability:</b> Confirm that eBGP sessions (underlay) and iBGP sessions (overlay) are both established — eBGP for the routed underlay between Spine and Leafs, and iBGP for EVPN route exchange between Leafs via the Spine route reflector.</li>
+</ol>
+
+<p><em>Design note:</em> In traditional datacenter deployments, it’s common to assign each Leaf two different AS numbers — one for eBGP (underlay) and another for iBGP (overlay). However, this approach becomes difficult to manage as the network scales.  
+In this configuration, a simplified model is used: all Leafs share the same AS (<code>64000</code>), while Spines use a distinct AS (<code>65xxx</code>). The <code>allow-as-loop</code> mechanism allows eBGP sessions to work even with shared AS numbers, greatly simplifying operations and making the AS scheme more intuitive and maintainable.</p>
