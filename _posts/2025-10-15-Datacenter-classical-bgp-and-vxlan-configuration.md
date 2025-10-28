@@ -266,3 +266,56 @@ stable loopbacks. The <code>allow-as-loop 1</code> line is the trick that lets y
 while still exchanging underlay routes with the opposite leaf.</p>
 
 
+<h4><strong>Second Step</strong>:Spine Configuration</h4>
+
+<p align="center">
+  <img src="{{ '/assets/images/2025-10-15/spine bgp.png' | relative_url }}"
+       alt="Spine BGP configuration"
+       style="max-width: 780px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</p>
+
+<pre><code>bgp 65000
+ router-id 172.17.2.194
+ peer 172.17.3.141 as-number 64000
+ peer 172.17.3.141 ebgp-max-hop 255
+ peer 172.17.3.42 as-number 64000
+ peer 172.17.3.42 connect-interface LoopBack0
+ #
+ address-family ipv4 unicast
+  network 172.17.2.194 255.255.255.255
+  peer 172.17.3.141 enable
+  peer 172.17.3.141 allow-as-loop 1
+ #
+ address-family l2vpn evpn
+  peer 172.17.3.42 enable
+</code></pre>
+
+<h5>Line-by-line explanation</h5>
+<ul>
+  <li><b>bgp 65000</b> — Starts the BGP process on the Spine with AS number <code>65000</code>. The spine typically uses a different AS from the leaves (<code>64000</code>) to form eBGP sessions for underlay reachability.</li>
+
+  <li><b>router-id 172.17.2.194</b> — Sets the unique BGP Router-ID, usually the loopback IP of the Spine. This provides a stable identifier independent of any physical interface status.</li>
+
+  <li><b>peer 172.17.3.141 as-number 64000</b> — Defines an eBGP neighbor, the IRF leaf device (AS <code>64000</code>), to exchange underlay routes.</li>
+
+  <li><b>peer 172.17.3.141 ebgp-max-hop 255</b> — Extends eBGP reachability beyond directly connected links. Required when the eBGP session is established through loopbacks or routed intermediate hops.</li>
+
+  <li><b>peer 172.17.3.42 as-number 64000</b> — Declares another peer with AS <code>64000</code> for iBGP EVPN peering. This is typically a loopback-to-loopback session with another leaf in the same AS domain.</li>
+
+  <li><b>peer 172.17.3.42 connect-interface LoopBack0</b> — Uses <code>LoopBack0</code> as the source interface for iBGP sessions. This ensures stable and redundant control-plane connectivity, decoupled from physical link failures.</li>
+
+  <li><b>address-family ipv4 unicast</b> — Activates the IPv4 underlay routing table within BGP, used for loopback and transit subnet advertisement.</li>
+
+  <li><b>network 172.17.2.194 255.255.255.255</b> — Advertises the Spine’s loopback /32 into BGP so other devices (like Leafs) can reach it for multi-hop peering and route reflection.</li>
+
+  <li><b>peer 172.17.3.141 enable</b> — Enables the IPv4 unicast neighbor session with the IRF leaf for underlay route exchange.</li>
+
+  <li style="border:1px solid #f66; padding:.4em; border-radius:.4em;"><b>peer 172.17.3.141 allow-as-loop 1</b> — 
+      <em>Crucial parameter for unified AS design.</em> It allows the Spine to accept routes that contain its own AS number once in the <code>AS_PATH</code>. This enables underlay communication with Leafs that share the same AS (e.g., <code>64000</code>) without BGP rejecting those routes as loops. The result is a clean single-AS fabric that behaves like eBGP between layers, without assigning unique ASNs to every device.</li>
+
+  <li><b>address-family l2vpn evpn</b> — Enables the EVPN control-plane, which carries MAC/IP and tenant information for VXLAN overlays.</li>
+
+  <li><b>peer 172.17.3.42 enable</b> — Activates the EVPN iBGP session with the remote leaf. The Spine acts as a <b>Route Reflector</b>, redistributing EVPN routes (Type-2 for MAC/IP, Type-5 for IRB) across the fabric.</li>
+</ul>
+
+<p><em>Result:</em> This configuration allows the Spine (AS 65000) to form eBGP underlay sessions with Leafs (AS 64000) while maintaining a unified single-AS architecture through <code>allow-as-loop 1</code>. It also establishes iBGP EVPN sessions over loopbacks for overlay control-plane distribution, enabling VXLAN EVPN operation with stable multi-hop BGP connectivity.</p>
