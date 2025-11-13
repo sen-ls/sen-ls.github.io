@@ -1,4 +1,4 @@
-title: Sen's Tech Blog
+title: Sen Tech Blog
 description: "Technology Blogs|Working Experiences Sharing"
 
 name: Sen Liao
@@ -20,6 +20,7 @@ header_pages:
   - categories/storage.md
   - categories/virtual-computing.md
   - categories/projects.md
+  - categories/wireless.md
 
 
 minima:

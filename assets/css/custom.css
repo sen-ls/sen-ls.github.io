@@ -35,3 +35,36 @@ h1, h2, h3, h4 {
   margin: 0 auto;
   line-height: 1.7;
 }
+
+/* 顶部导航左右分栏 */
+.nav-flex {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.nav-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem .9rem;
+}
+.nav-right {
+  margin-left: auto; /* 推到最右边 */
+}
+
+/* About 链接图标 */
+.about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+.about-icon {
+  vertical-align: middle;
+  fill: currentColor; /* 继承文字颜色 */
+  opacity: 0.9;
+}
+
+/* 移动端：让右侧链接换行到菜单里也居中显示 */
+@media (max-width: 600px) {
+  .nav-flex { flex-direction: column; align-items: flex-start; }
+  .nav-right { margin-left: 0; }
+}
