@@ -15,6 +15,12 @@ plugins:
 
 header_pages:
   - about.md
+  - categories/routing.md
+  - categories/switching.md
+  - categories/storage.md
+  - categories/virtual-computing.md
+  - categories/projects.md
+
 
 minima:
   social_links:

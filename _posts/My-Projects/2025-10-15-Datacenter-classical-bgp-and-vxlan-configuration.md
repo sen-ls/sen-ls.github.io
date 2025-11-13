@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "Datacenter Classical BGP and VXLAN Configuration"
-categories: [networking, datacenter]
-tags: [bgp, vxlan, configuration]
+categories: [projects]
+tags: [bgp, vxlan, configuration, Datacenter]
 ---
 
 <p>

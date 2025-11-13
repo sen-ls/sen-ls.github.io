@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Campus network classical configuration"
-categories: [networking, campus lan]
+categories: [projects]
 tags: [rbm, link aggeregation, irf]
 ---
 
