@@ -1,43 +1,18 @@
-<header class="site-header" role="banner">
-  <div class="wrapper site-header-inner">
-    <!-- 标题 / Logo（保留原样式类，避免主题样式失效） -->
-    <a class="site-title" rel="author" href="{{ "/" | relative_url }}">
-      {{ site.title | escape }}
-    </a>
+<header class="site-header">
 
-    <!-- 顶部导航（移动端保留汉堡菜单） -->
-    <nav class="site-nav" role="navigation">
-      <input type="checkbox" id="nav-trigger" class="nav-trigger" />
-      <label for="nav-trigger">
-        <span class="menu-icon">
-          <svg viewBox="0 0 18 15" width="18" height="15" aria-hidden="true">
-            <path d="M18,1.5H0V0h18V1.5z M18,8.2H0V6.8h18V8.2z M18,15H0v-1.5h18V15z"/>
-          </svg>
-        </span>
-      </label>
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="{{ " /" | relative_url }}">{{ site.title | escape }}</a>
 
-      <div class="trigger nav-flex">
-        <!-- 左侧：Categories（按 a-z 或自定义顺序） -->
-        <div class="nav-left">
-          <!-- 你也可以手动写死顺序：routing / switching / storage / virtual-computing / projects -->
-          <a class="page-link" href="{{ '/categories/routing/' | relative_url }}">Routing</a>
-          <a class="page-link" href="{{ '/categories/switching/' | relative_url }}">Switching</a>
-          <a class="page-link" href="{{ '/categories/storage/' | relative_url }}">Storage</a>
-          <a class="page-link" href="{{ '/categories/virtual-computing/' | relative_url }}">Virtual&nbsp;Computing</a>
-          <a class="page-link" href="{{ '/categories/projects/' | relative_url }}">My&nbsp;Projects</a>
-          <a class="page-link" href="{{ '/categories/wireless/' | relative_url }}">My&nbsp;Wireless</a>
-        </div>
+    <nav class="site-nav">
+      {%- assign default_paths = site.pages | map: "path" -%}
+      {%- assign page_paths = site.header_pages | default: default_paths -%}
 
-        <!-- 右侧：About（带图标） -->
-        <div class="nav-right">
-          <a class="page-link about-link" href="{{ '/about/' | relative_url }}" title="About">
-            <svg class="about-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/>
-            </svg>
-            <span>About</span>
-          </a>
-        </div>
-      </div>
+      {%- for path in page_paths -%}
+      {%- assign my_page = site.pages | where: "path", path | first -%}
+      {%- if my_page.title -%}
+      <a class="page-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
+      {%- endif -%}
+      {%- endfor -%}
     </nav>
   </div>
 </header>

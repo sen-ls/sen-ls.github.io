@@ -1,16 +1,38 @@
-<div align="center" style="margin-top: 1em;">
-  <div class="badge-base LI-profile-badge"
-       data-locale="zh_CN"
-       data-size="medium"
-       data-theme="light"
-       data-type="HORIZONTAL"
-       data-vanity="sen-liao-737971164"
-       data-version="v1">
-    <a class="badge-base__link LI-simple-link"
-       href="https://de.linkedin.com/in/sen-liao-737971164?trk=profile-badge">
-       Sen Liao
-    </a>
-  </div>
-  <script src="https://platform.linkedin.com/badges/js/profile.js"
-          async defer type="text/javascript"></script>
-</div>
+<footer class="site-footer h-card">
+   <div class="wrapper">
+      <div class="footer-col-wrapper">
+         <div class="footer-col">
+            <h4>{{ site.title | escape }}</h4>
+            <p>{{ site.description | escape }}</p>
+         </div>
+
+         <div class="footer-col">
+            <h4>Connect</h4>
+            {%- if site.minima.social_links -%}
+            <ul class="social-media-list">
+               {%- for link in site.minima.social_links -%}
+               <li>
+                  <a href="{{ link.user_url }}">
+                     {{ link.platform }}
+                  </a>
+               </li>
+               {%- endfor -%}
+            </ul>
+            {%- endif -%}
+         </div>
+
+         <div class="footer-col">
+            <h4>Contact</h4>
+            <ul class="social-media-list">
+               {%- if site.email -%}
+               <li><a class="u-email" href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+               {%- endif -%}
+            </ul>
+         </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem; font-size: 0.9rem; color: var(--color-text-muted);">
+         &copy; {{ site.time | date: '%Y' }} {{ site.title | escape }}. All rights reserved.
+      </div>
+   </div>
+</footer>
