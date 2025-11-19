@@ -1,12 +1,12 @@
 ---
 layout: page
-title: My Projects
+title: Wireless
 permalink: /categories/wireless/
 ---
 
 <h2>Project Posts</h2>
 <ul>
-{% assign posts = site.categories.projects | sort: 'date' | reverse %}
+{% assign posts = site.categories.wireless | sort: 'date' | reverse %}
 {% if posts and posts.size > 0 %}
   {% for post in posts %}
     <li>

@@ -4,7 +4,7 @@ description: "Technology Blogs|Working Experiences Sharing"
 name: Sen Liao
 email: sen.liao@outlook.com
 
-url: https://sen-ls.github.io/about/        # e.g. https://sen-ls.github.io
+url: https://sen-ls.github.io        # e.g. https://sen-ls.github.io
 baseurl: ""    # for project site: /repo-name
 
 theme: minima
