@@ -35,6 +35,9 @@ We examined the port configuration for the outbound ports `1/0/7` and `2/0/7`. T
 - **VLAN 3201**: Emergency Call
 - **VLAN 3202**: Normal Call
 
+![Port Configuration](/assets/images/2025-11-19/3.png)
+*Figure 3: Configuration of port 2/0/7.*
+
 ### QoS and Switch Health
 
 We checked the QoS (Quality of Service) settings for the entire switch and the specific ports. The analysis showed that the overall packet flow within the switch was normal, ruling out congestion or general switch performance issues.
@@ -51,11 +54,11 @@ The packet flow from the same source to the same destination was traversing Laye
 1.  **VLAN 3202**: This is the correct path for the business flow.
 2.  **VLAN 2933**: This appeared to be a management flow path, which is abnormal for this traffic.
 
-![Wireshark Trace](/assets/images/2025-11-19/3.png)
-*Figure 3: Wireshark trace showing traffic on VLAN 3202.*
+![Wireshark Trace VLAN 3202](/assets/images/2025-11-19/4.png)
+*Figure 4: Wireshark trace showing traffic on VLAN 3202 (Business Flow).*
 
-![Wireshark Trace Abnormal](/assets/images/2025-11-19/4.png)
-*Figure 4: Wireshark trace showing traffic leaking to VLAN 2933.*
+![Wireshark Trace VLAN 2933](/assets/images/2025-11-19/5.png)
+*Figure 5: Wireshark trace showing traffic leaking to VLAN 2933 (Abnormal Flow).*
 
 This behavior suggests that the MAC address was being learned on different VLANs or the traffic was being tagged incorrectly by the uplink device, causing confusion in the switch's forwarding logic (MAC address flapping/instability between VLAN contexts).
 
@@ -71,6 +74,3 @@ To resolve this, we need to ensure strict traffic separation based on the flow t
 2.  **Static Routing**: Implement a static route on the SBC to force all traffic destined for `100.90.75.44` to go **only** through **VLAN 3202**.
 
 By enforcing this path, the ambiguity is removed, and the switch can forward packets consistently without loss.
-
-![Solution Verification](/assets/images/2025-11-19/5.png)
-*Figure 5: Verified stable traffic flow after applying the fix.*

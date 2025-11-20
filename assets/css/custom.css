@@ -2,30 +2,36 @@
 
 :root {
   /* Colors */
-  --color-primary: #4f46e5; /* Indigo 600 */
-  --color-primary-hover: #4338ca; /* Indigo 700 */
-  --color-background: #f9fafb; /* Gray 50 */
+  --color-primary: #4f46e5;
+  /* Indigo 600 */
+  --color-primary-hover: #4338ca;
+  /* Indigo 700 */
+  --color-background: #f9fafb;
+  /* Gray 50 */
   --color-surface: #ffffff;
-  --color-text-main: #111827; /* Gray 900 */
-  --color-text-muted: #6b7280; /* Gray 500 */
-  --color-border: #e5e7eb; /* Gray 200 */
-  
+  --color-text-main: #111827;
+  /* Gray 900 */
+  --color-text-muted: #6b7280;
+  /* Gray 500 */
+  --color-border: #e5e7eb;
+  /* Gray 200 */
+
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
-  
+
   /* Spacing */
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  
+
   /* Radius */
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -45,7 +51,12 @@ body {
   padding: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   color: var(--color-text-main);
   line-height: 1.2;
@@ -225,6 +236,14 @@ a:hover {
   margin-bottom: var(--spacing-md);
 }
 
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin: var(--spacing-md) 0;
+}
+
 .post-content code {
   background-color: #f3f4f6;
   padding: 0.2em 0.4em;
@@ -279,16 +298,16 @@ a:hover {
   .hero-title {
     font-size: 2rem;
   }
-  
+
   .post-title {
     font-size: 2rem;
   }
-  
+
   .site-header .wrapper {
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-  
+
   .site-nav .page-link {
     margin: 0 var(--spacing-xs);
   }
